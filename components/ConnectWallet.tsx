@@ -1,24 +1,51 @@
 "use client";
 
 import { useState } from "react";
+import { createWalletClient, custom } from "viem";
+import { base } from "viem/chains";
 
 export default function ConnectWallet() {
-  const [connected, setConnected] = useState(false);
+  const [address, setAddress] = useState<string | null>(null);
+
+  async function connect() {
+    if (!window.ethereum) {
+      alert("Wallet not found. Please open inside Base App.");
+      return;
+    }
+
+    try {
+      const client = createWalletClient({
+        chain: base,
+        transport: custom(window.ethereum)
+      });
+
+      const accounts = await client.requestAddresses();
+      setAddress(accounts[0]);
+    } catch (err) {
+      console.error(err);
+      alert("Could not connect wallet");
+    }
+  }
 
   return (
-    <div style={{ margin: "20px 0" }}>
-      {connected ? (
-        <p>Wallet Connected ✔️</p>
+    <div style={{ marginBottom: "20px" }}>
+      {address ? (
+        <div>
+          <p style={{ fontSize: "16px" }}>Connected:</p>
+          <p style={{ fontWeight: "bold" }}>{address}</p>
+        </div>
       ) : (
         <button
+          onClick={connect}
           style={{
-            background: "#1e90ff",
-            padding: "10px 20px",
-            borderRadius: 10,
+            padding: "12px 18px",
+            background: "#005eff",
+            color: "white",
+            borderRadius: "12px",
             border: "none",
-            color: "#fff"
+            fontSize: "16px",
+            cursor: "pointer"
           }}
-          onClick={() => setConnected(true)}
         >
           Connect Wallet
         </button>
