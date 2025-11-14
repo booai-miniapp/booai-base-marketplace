@@ -1,4 +1,5 @@
 export default {
-  platform: "farcaster",
-  webhookUrl: "/api/webhook"
+  appName: "BooAI Base Marketplace",
+  basePath: "/",
+  webhook: "/api/webhook"
 };
