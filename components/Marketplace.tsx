@@ -2,46 +2,96 @@
 
 import { useEffect, useState } from "react";
 
-export default function Marketplace() {
+export default function Marketplace({ wallet }: { wallet: string | null }) {
   const [nfts, setNfts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const OPENSEA_API = "https://api.opensea.io/api/v2/chain/base/nfts";
+  async function loadNFTs() {
+    if (!wallet) return;
 
-  useEffect(() => {
-    async function fetchNFTs() {
-      try {
-        const res = await fetch(OPENSEA_API);
-        const data = await res.json();
+    setLoading(true);
 
-        setNfts(data.nfts || []);
-      } catch (err) {
-        console.error("Error fetching NFTs:", err);
+    try {
+      const url = `https://api.simplehash.com/api/v0/nfts/owners?chains=base&wallet_addresses=${wallet}`;
+
+      const res = await fetch(url, {
+        headers: {
+          accept: "application/json"
+        }
+      });
+
+      const data = await res.json();
+
+      if (data.nfts) {
+        setNfts(data.nfts);
       }
-
-      setLoading(false);
+    } catch (err) {
+      console.error(err);
     }
 
-    fetchNFTs();
-  }, []);
+    setLoading(false);
+  }
 
-  if (loading) return <p>Loading NFTs...</p>;
+  useEffect(() => {
+    loadNFTs();
+  }, [wallet]);
 
   return (
     <div>
-      <h2 style={{ fontSize: "22px", marginBottom: "15px" }}>🔥 BooAI NFT Marketplace</h2>
+      <h2 style={{ fontSize: "20px", marginBottom: "10px" }}>
+        Your NFTs on Base
+      </h2>
 
-      {nfts.length === 0 && <p>No NFTs found.</p>}
+      {!wallet && <p>Connect your wallet to view NFTs</p>}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
-        {nfts.map((nft, index) => (
-          <div key={index} style={{ border: "1px solid #333", padding: "10px", borderRadius: "10px" }}>
+      {loading && <p>Loading NFTs...</p>}
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "12px",
+        }}
+      >
+        {nfts.map((nft, i) => (
+          <div
+            key={i}
+            style={{
+              background: "#111",
+              padding: "10px",
+              borderRadius: "10px",
+            }}
+          >
             <img
-              src={nft.image_url || "/placeholder.png"}
-              alt="NFT"
-              style={{ width: "100%", borderRadius: "10px" }}
+              src={nft.image_url || nft.previews?.image_small_url}
+              style={{
+                width: "100%",
+                borderRadius: "8px",
+                marginBottom: "8px",
+              }}
             />
-            <p style={{ marginTop: "8px", fontWeight: "bold" }}>{nft.name || "Unnamed NFT"}</p>
+
+            <p style={{ fontSize: "14px", fontWeight: "bold" }}>
+              {nft.name || "Unnamed NFT"}
+            </p>
+
+            <p style={{ fontSize: "12px", opacity: 0.7 }}>
+              {nft.collection?.name}
+            </p>
+
+            <button
+              style={{
+                marginTop: "6px",
+                padding: "8px",
+                width: "100%",
+                background: "#0070f3",
+                color: "white",
+                borderRadius: "8px",
+                border: "none",
+              }}
+            >
+              Sell
+            </button>
           </div>
         ))}
       </div>
