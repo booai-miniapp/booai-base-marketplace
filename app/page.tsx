@@ -1,16 +1,16 @@
 "use client";
 
-import Marketplace from "../components/Marketplace";
+import { useState } from "react";
 import ConnectWallet from "../components/ConnectWallet";
+import Marketplace from "../components/Marketplace";
 
 export default function Home() {
+  const [wallet, setWallet] = useState<string | null>(null);
+
   return (
-    <main style={{ padding: 20 }}>
-      <h1>BooAI Base Marketplace</h1>
-
-      <ConnectWallet />
-
-      <Marketplace />
-    </main>
+    <div style={{ padding: "20px" }}>
+      <ConnectWallet onConnect={(addr: string) => setWallet(addr)} />
+      <Marketplace wallet={wallet} />
+    </div>
   );
 }
