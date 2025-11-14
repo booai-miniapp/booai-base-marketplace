@@ -1,1 +1,7 @@
-
+{
+  "farcaster": {
+    "appName": "BooAI Marketplace",
+    "appUrl": "https://booai-base-marketplace.github.io",
+    "developer": "booai"
+  }
+}
