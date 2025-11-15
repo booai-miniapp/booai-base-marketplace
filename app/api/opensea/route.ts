@@ -1,32 +1,33 @@
 import { NextResponse } from "next/server";
 
-const OPENSEA_API = "https://api.opensea.io/api/v1/assets";
-
-/**
- * Server-side proxy to call OpenSea with an API key stored in environment
- * Add OPEN_SEA_API_KEY to Vercel / GitHub Secrets.
- */
-export async function GET(request: Request) {
+export async function GET(req: Request) {
   try {
-    const url = new URL(request.url);
-    const limit = url.searchParams.get("limit") || "24";
+    const API_KEY = process.env.OPEN_SEA_API_KEY;
+    if (!API_KEY) {
+      return NextResponse.json(
+        { error: "Missing OpenSea API key" },
+        { status: 500 }
+      );
+    }
 
-    const apiKey = process.env.OPEN_SEA_API_KEY || "";
-    const params = new URLSearchParams({
-      limit,
-    });
-    const finalUrl = `${OPENSEA_API}?${params.toString()}`;
+    // OpenSea V2 chain/Base endpoint
+    const url = "https://api.opensea.io/api/v2/chain/base/nfts";
 
-    const res = await fetch(finalUrl, {
+    const res = await fetch(url + "?limit=20", {
       headers: {
-        "Accept": "application/json",
-        ...(apiKey ? { "X-API-KEY": apiKey } : {})
-      }
+        "accept": "application/json",
+        "X-API-KEY": API_KEY,
+      },
     });
 
     const data = await res.json();
+
     return NextResponse.json(data);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "error" }, { status: 500 });
+
+  } catch (err) {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
